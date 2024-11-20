@@ -1,0 +1,65 @@
+name: Node.js Deployment with NGINX and SSL
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS using SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # Navigate to project directory
+            cd /var/www/html/nsi/admin
+
+            # Fetch latest changes and reset to main branch
+            git fetch --all
+            git reset --hard origin/main
+
+            # Setup environment and dependencies
+            cp .env.example .env
+            npm install --legacy-peer-deps
+            npm run build
+
+            # Deploy NGINX Configuration Conditionally
+            admin_CONF="/etc/nginx/sites-available/admin.nsintbd.com"
+            PROJECT_CONF="/var/www/html/nsi/admin/nginx.conf"
+
+            if ! diff -q "$PROJECT_CONF" "$admin_CONF" > /dev/null; then
+              echo "NGINX configuration has changed. Updating..."
+              sudo cp "$PROJECT_CONF" "$admin_CONF"
+
+              # Ensure symbolic link exists in sites-enabled
+              if [ ! -f /etc/nginx/sites-enabled/admin.nsintbd.com ]; then
+                sudo ln -s "$admin_CONF" /etc/nginx/sites-enabled/admin.nsintbd.com
+              fi
+
+              # Test and reload NGINX
+              sudo nginx -t && sudo systemctl reload nginx
+            else
+              echo "NGINX configuration is unchanged. Skipping update."
+            fi
+
+            # Manage SSL using Certbot
+            if [ ! -f /etc/letsencrypt/live/admin.nsintbd.com/fullchain.pem ]; then
+              echo "SSL not found. Setting up Certbot..."
+              sudo certbot --nginx -d admin.nsintbd.com
+            else
+              echo "SSL certificate exists. Skipping Certbot."
+            fi
+
+            # Manage PM2 process
+            if pm2 describe nsi-admin > /dev/null; then
+              pm2 restart nsi-admin
+            else
+              pm2 start npm --name "nsi-admin" -- run start
+            fi
+
+            # Save PM2 process list
+            pm2 save
