@@ -1,5 +1,5 @@
 import React from "react";
-import { useMediaQuery, Box, Drawer, Typography } from "@mui/material";
+import { useMediaQuery, Box, Drawer, Typography, Button } from "@mui/material";
 import SidebarItems from "./SidebarItems";
 import { Sidebar, Logo } from "react-mui-sidebar";
 import SideBarItems from "./SidebarItems";
@@ -43,6 +43,9 @@ const MSidebar = ({
               color: "#fff",
               padding: "10px",
               borderRight: "1px solid #ddd",
+              display: 'flex',
+              flexDirection: '',
+              justifyContent: 'space-between',
               ...scrollbarStyles,
             },
           }}
@@ -76,8 +79,31 @@ const MSidebar = ({
                 ))}
               </Box>
             </Sidebar>
+
+
+
+          </Box>
+          <Box sx={{ textAlign: 'center', marginBottom: '0px' }}>
+            <Button
+              component={Link}
+              href="https://nsintbd.com/"
+              sx={{
+                background: '#1EAAF1',
+                width: '100%',
+                marginBottom: '30px',
+                marginTop: '10px',
+                transition: 'background-color 0.3s ease',
+                '&:hover': {
+                  background: 'red',
+                },
+              }}
+            >
+              Website
+            </Button>
+
           </Box>
         </Drawer>
+
       </Box>
     );
   }

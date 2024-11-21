@@ -80,7 +80,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             <NSIInput
               
               name="name"
-              placeholder="Enter your email address"
+              placeholder="Enter your username"
               label="User Name"
               fullWidth
             />

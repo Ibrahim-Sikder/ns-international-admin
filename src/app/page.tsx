@@ -1,5 +1,5 @@
 "use client";
-import { Grid, Box, Card } from "@mui/material";
+import { Grid, Box, Card, Typography } from "@mui/material";
 import AuthLogin from "@/components/auth/AuthLogin";
 import PageContainer from "./(Dashboard)/components/container/PageContainer";
 
@@ -38,32 +38,37 @@ const Login2 = () => {
             alignItems="center"
           >
             <Card
-              elevation={15} 
+              elevation={15}
               sx={{
                 p: 4,
                 zIndex: 1,
                 width: "100%",
                 maxWidth: "600px",
-                height: "500px", 
-                boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.1)", 
+                height: "400px",
+                boxShadow: "0px 8px 25px rgba(0, 0, 0, 0.1)",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "center", 
+                justifyContent: "center",
               }}
             >
               <Box
                 display="flex"
-                component="h4"
+                component="h2"
                 alignItems="center"
                 justifyContent="center"
                 sx={{
-                  fontSize: "1.5rem", 
+                  fontSize: "1.3rem",
                   fontWeight: "bold",
                   marginBottom: 2,
+                  height: "100%",
+                  flexDirection: "column", 
                 }}
               >
-                WELCOME TO The NS-INTERNATIONAL
+                <Typography> WELCOME TO THE </Typography>
+                NS-INTERNATIONAL
+
               </Box>
+
               <AuthLogin />
             </Card>
           </Grid>

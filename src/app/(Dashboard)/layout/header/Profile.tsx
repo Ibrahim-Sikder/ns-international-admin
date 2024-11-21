@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Avatar,
   Box,
@@ -7,29 +8,38 @@ import {
   Button,
   IconButton,
   MenuItem,
-  ListItemIcon,
   ListItemText,
+  ListItemIcon,
 } from "@mui/material";
-
 import { IconSettings, IconUser } from "@tabler/icons-react";
-import { signOut } from "next-auth/react";
-import { useAppDispatch } from "@/redux/hooks";
-import { logout } from "@/redux/features/auth/authSlice";
+import Cookies from "js-cookie";
 
 const Profile = () => {
+  const router = useRouter();
   const [anchorEl2, setAnchorEl2] = useState(null);
+
   const handleClick2 = (event: any) => {
     setAnchorEl2(event.currentTarget);
   };
+
   const handleClose2 = () => {
     setAnchorEl2(null);
   };
 
-  const dispatch = useAppDispatch();
-
   const handleLogout = () => {
-    signOut();
-    dispatch(logout());
+    Cookies.remove('token', { path: '/' });
+
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    }
+    localStorage.clear();
+
+
+    router.push('/');
   };
 
   return (
@@ -37,12 +47,13 @@ const Profile = () => {
       <IconButton
         size="large"
         aria-label="show 11 new notifications"
-        color="inherit"
         aria-controls="msgs-menu"
         aria-haspopup="true"
         sx={{
+          color: 'black',
+
           ...(typeof anchorEl2 === "object" && {
-            color: "primary.main",
+            color: "black",
           }),
         }}
         onClick={handleClick2}
@@ -56,9 +67,6 @@ const Profile = () => {
           }}
         />
       </IconButton>
-      {/* ------------------------------------------- */}
-      {/* Message Dropdown */}
-      {/* ------------------------------------------- */}
       <Menu
         id="msgs-menu"
         anchorEl={anchorEl2}
@@ -70,45 +78,39 @@ const Profile = () => {
         sx={{
           "& .MuiMenu-paper": {
             width: "200px",
+            backgroundColor: '#00579A', // Remove background
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)', // Optional: subtle shadow
           },
+          "& .MuiMenuItem-root": {
+            color: 'black', // Black text color
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.05)', // Light hover effect
+            }
+          },
+          "& .MuiListItemIcon-root": {
+            color: '#fff', // Black icon color
+          }
         }}
       >
-        <Link
-          href="/dashboard/profile"
-          passHref
-          style={{
-            textDecoration: "none",
-          }}
-        >
-          <MenuItem component="a">
-            <ListItemIcon>
-              <IconUser width={20} />
-            </ListItemIcon>
-            <ListItemText>Profile</ListItemText>
-          </MenuItem>
-        </Link>
-        <Link
-          href="/dashboard/settings"
-          passHref
-          style={{
-            textDecoration: "none",
-          }}
-        >
-          <MenuItem component="a">
-            <ListItemIcon>
-              <IconSettings width={20} />
-            </ListItemIcon>
-            <ListItemText>Settings</ListItemText>
-          </MenuItem>
-        </Link>
-
+        <MenuItem component="a">
+          <ListItemIcon>
+            <IconUser width={20} />
+          </ListItemIcon>
+          <ListItemText>Profile</ListItemText>
+        </MenuItem>
+        <MenuItem component="a">
+          <ListItemIcon>
+            <IconSettings width={20} />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
+        </MenuItem>
         <Box mt={1} py={1} px={2}>
           <Button
-            href="/authentication/login"
             variant="outlined"
             color="error"
             onClick={handleLogout}
             fullWidth
+            sx={{ background: 'white', color: 'black' }}
           >
             Logout
           </Button>

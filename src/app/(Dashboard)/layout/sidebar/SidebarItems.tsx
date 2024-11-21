@@ -27,7 +27,7 @@ const ListItemStyled = styled(ListItem, {
   ".MuiButtonBase-root": {
     whiteSpace: "nowrap",
     marginBottom: "4px",
-    padding: nested ? "5px 16px" : "8px 18px", 
+    padding: nested ? "5px 16px" : "5px 18px", 
     borderRadius: "6px",
     color: isActive ? '#fff' : 'white',
     background: isActive ? '' : theme.palette.primary,
@@ -77,7 +77,7 @@ const SideBarItems = ({ index, item }: IProps) => {
         <ListItemIcon sx={{ minWidth: "28px", color: 'white' }}>
           {item.icon && <item.icon />}
         </ListItemIcon>
-        <ListItemText primary={item.title} sx={{ ml: 4.3, color: 'white' }} />
+        <ListItemText primary={item.title} sx={{ ml: 4.2, color: 'white' }} />
       </AccordionSummary>
       <AccordionDetails sx={{ p: 0, m: 0, position: 'relative', marginLeft: '30px', color: 'white' }}>
 
@@ -85,7 +85,7 @@ const SideBarItems = ({ index, item }: IProps) => {
           sx={{
             position: 'absolute',
             top: 0,
-            left: '15px',
+            left: '8px',
             bottom: 0,
             width: '2px',
             bgcolor: 'white',

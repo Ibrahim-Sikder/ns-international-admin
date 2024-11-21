@@ -1,13 +1,11 @@
 import {
   AppBar,
   Box,
-  Button,
   IconButton,
   Stack,
   Toolbar,
   styled,
 } from "@mui/material";
-import Link from "next/link";
 import PropTypes from "prop-types";
 import React from "react";
 import { IconMenu } from "@tabler/icons-react";
@@ -20,17 +18,18 @@ interface ItemType {
 const Header = ({ toggleMobileSidebar }: ItemType) => {
   const AppBarStyled = styled(AppBar)(({ theme }) => ({
     boxShadow: "none",
-    background: theme.palette.background.paper,
+    background: "#00579A",
     justifyContent: "center",
     backdropFilter: "blur(4px)",
     [theme.breakpoints.up("lg")]: {
       minHeight: "70px",
     },
+    color: "white",
   }));
 
   const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
     width: "100%",
-    color: theme.palette.text.secondary,
+    color: "#111",
   }));
 
   return (
@@ -45,12 +44,14 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
               lg: "none",
               xs: "inline",
             },
+            color: "black",
           }}
         >
           <IconMenu width="20" height="20" />
         </IconButton>
 
         <Box flexGrow={1} />
+
         <Stack spacing={1} direction="row" alignItems="center">
           <Profile />
         </Stack>
