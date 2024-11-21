@@ -56,7 +56,7 @@ jobs:
 
             # Manage PM2 process
             if pm2 describe nsi-admin > /dev/null; then
-              pm2 restart nsi-admin
+               pm2 restart nsi-admin
             else
               pm2 start npm --name "nsi-admin" -- run start
             fi
