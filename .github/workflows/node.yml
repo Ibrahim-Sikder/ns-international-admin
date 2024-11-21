@@ -49,7 +49,7 @@ jobs:
             # Manage SSL using Certbot
             if [ ! -f /etc/letsencrypt/live/admin.nsintbd.com/fullchain.pem ]; then
               echo "SSL not found. Setting up Certbot..."
-              sudo certbot --nginx -d admin.nsintbd.com
+              sudo certbot --nginx -d admin.nsintbd.com --non-interactive --agree-tos --register-unsafely-without-email
             else
               echo "SSL certificate exists. Skipping Certbot."
             fi
