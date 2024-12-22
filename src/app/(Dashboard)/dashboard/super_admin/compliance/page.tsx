@@ -172,7 +172,7 @@ const CompiliancePage = () => {
         },
     };
     const iconStyle = { fontSize: '20px' }
-    console.log(compilianceData)
+  
 
     return (
         <PageContainer title="Services" >

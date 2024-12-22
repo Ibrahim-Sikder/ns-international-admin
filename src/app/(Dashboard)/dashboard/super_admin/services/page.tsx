@@ -23,6 +23,7 @@ import CreateServiceModal from "./_components/CreateServiceModal";
 import UpdateServiceModal from "./_components/UpdateServiceModal";
 import { useDeleteServiceMutation, useGetAllServiceQuery } from "@/redux/api/serviceApi";
 import ReactHtmlParser from "react-html-parser";
+import ServiceCategory from "./_components/ServiceCategory";
 const renderContent = (content: string) => {
     const parsedContent = ReactHtmlParser(content);
 
@@ -89,6 +90,7 @@ const renderContent = (content: string) => {
 
 const ServicePage = () => {
     const [open, setOpen] = useState(false);
+    const [categoryOpen, setCategoryOpen] = useState(false);
     const [openUpdateModal, setOpenUpdateModal] = useState(false);
     const [selectedTortureId, setSelectedTortureId] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -102,6 +104,8 @@ const ServicePage = () => {
     };
 
     const handleClose = () => setOpen(false);
+    const handleCategoryOpen = () => setCategoryOpen(true);
+    const handleCategoryClose = () => setCategoryOpen(false);
     const handleCloseUpdateModal = () => setOpenUpdateModal(false);
 
     if (isLoading) {
@@ -147,13 +151,6 @@ const ServicePage = () => {
         return <p>Loading.......</p>
     }
 
-    const formatDate = (dateString: string | number | Date) => {
-        const date = new Date(dateString);
-        const day = date.getDate().toString().padStart(2, "0");
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
-    }
 
     const iconButtonStyle = {
         width: '30px',
@@ -179,11 +176,19 @@ const ServicePage = () => {
                     <Box display='flex' justifyContent='space-between'>
                         <Typography variant="h5" fontWeight='bold'>Services List </Typography>
 
-                        <Button
-                            onClick={handleOpen}
-                            startIcon={<AddCircleOutlineIcon />}>
-                            Create Service
-                        </Button>
+                        <div className="flex items-center gap-x-2">
+                            <Button
+                                sx={{ marginRight: '3px' }}
+                                onClick={handleOpen}
+                                startIcon={<AddCircleOutlineIcon />}>
+                                Create Service
+                            </Button>
+                            <Button
+                                onClick={handleCategoryOpen}
+                                startIcon={<AddCircleOutlineIcon />}>
+                                Create Category
+                            </Button>
+                        </div>
 
                     </Box>
                     <Box bgcolor="white" padding={3}>
@@ -191,8 +196,8 @@ const ServicePage = () => {
                             <Table aria-label="simple table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="center">Title</TableCell>
                                         <TableCell align="center">Image</TableCell>
+                                        <TableCell align="center">Title</TableCell>
                                         <TableCell align="center">Category</TableCell>
                                         <TableCell align="center">Description</TableCell>
                                         <TableCell align="center">Actions</TableCell>
@@ -204,7 +209,7 @@ const ServicePage = () => {
                                             key={data._id}
                                             sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                                         >
-                                            <TableCell align="center">{data.title}</TableCell>
+
                                             <TableCell align="center">
 
                                                 {
@@ -215,9 +220,10 @@ const ServicePage = () => {
                                                     ))
                                                 }
                                             </TableCell>
-                                            <TableCell align="center">{data?.category}</TableCell>
+                                            <TableCell align="center">{data.title}</TableCell>
+                                            <TableCell align="center">{data?.category?.name}</TableCell>
 
-                                            <TableCell align="center">{renderContent(data?.description?.slice(0, 20))}...</TableCell>
+                                            <TableCell  align="center">{renderContent(data?.description?.slice(0, 20))}</TableCell>
 
 
                                             <TableCell align="center">
@@ -253,6 +259,13 @@ const ServicePage = () => {
 
                         />
                     )}
+                    {categoryOpen && (
+                        <ServiceCategory
+                            open={categoryOpen}
+                            setOpen={handleCategoryClose}
+
+                        />
+                    )}
                     {openUpdateModal && (
                         <UpdateServiceModal
                             open={openUpdateModal}
@@ -260,11 +273,15 @@ const ServicePage = () => {
                             id={selectedTortureId}
                         />
                     )}
+
                 </Box>
             </DashboardCard>
             <Stack spacing={2} display='flex' justifyItems='center' alignItems='center' marginTop='20px'>
                 <Pagination count={totalPage} page={currentPage} onChange={handlePageChange} color="primary" />
             </Stack>
+
+
+
         </PageContainer>
     );
 };

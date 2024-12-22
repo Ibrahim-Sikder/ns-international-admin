@@ -43,8 +43,16 @@ export type TService = {
   title:string,
   sub_title:string,
   description:string,
-  category:string,
+  category:{
+    name:string;
+    
+  },
   images:string[],
+
+};
+export type TServiceCategory = {
+  _id: string,
+  name:string,
 };
 
 

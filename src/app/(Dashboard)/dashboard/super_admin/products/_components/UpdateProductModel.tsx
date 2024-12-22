@@ -2,7 +2,7 @@
 
 import ADForm from "@/components/Forms/Form";
 import { Box, Button, Grid, styled, Typography, } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import GlobalImageSelector from "@/components/Shared/ImageSelector/GlobalImageSelector";
 import { toast } from "sonner";
@@ -12,9 +12,10 @@ import NSIInput from "@/components/Forms/Input";
 import NSISelect from "@/components/Forms/Select";
 import { productCategory, serviceCategory } from "@/constant/service";
 import { useGetSingleServiceQuery, useUpdateServiceMutation } from "@/redux/api/serviceApi";
-import { useGetSingleProductQuery, useUpdateProductMutation } from "@/redux/api/productApi";
+import { useGetAllProductCategoriesQuery, useGetSingleProductQuery, useUpdateProductMutation } from "@/redux/api/productApi";
 import NSIAutoComplete from "@/components/Forms/AutoComplete";
 import NSITextArea from "@/components/Forms/TextArea";
+import CategoryAutocomplete from "../../services/_components/CategoryAutocomplete";
 
 
 const FormContainer = styled(Box)(({ theme }) => ({
@@ -41,26 +42,41 @@ type TProps = {
 const UpdateProductModel = ({ open, setOpen, id }: TProps) => {
     const [images, setImages] = useState<string[]>([]);
     const [imageOpen, setImageOpen] = useState(false);
-
-
     const [updateService] = useUpdateProductMutation()
     const { data, isLoading } = useGetSingleProductQuery(id)
+    const [currentPage, setCurrentPage] = useState(1);
+    const { data: categoriesData } = useGetAllProductCategoriesQuery({ page: currentPage, limit: 5 });
+    const categoryOptions = useMemo(() => {
+        if (!categoriesData?.data?.productCategories) return [];
+        return categoriesData.data.productCategories.map((category: any) => ({
+            label: category.name,
+            value: category._id,
+        }));
+    }, [categoriesData?.data?.productCategories]);
 
     const handleSubmit = async (data: FieldValues) => {
         data.images = images;
 
-        if (Array.isArray(data.category)) {
-            data.category = data.category.filter(key => key != null).map(
-                (key: any) => (typeof key === 'object' ? key.category : key)
-            );
-        }
+
         if (Array.isArray(data.meta_keywords)) {
             data.meta_keywords = data.meta_keywords.filter(key => key != null).map(
                 (key: any) => (typeof key === 'object' ? key.meta_keywords : key)
             );
         }
+        const modifyValues = {
+            category:
+                data.category &&
+                    data.category[0] &&
+                    categoryOptions.find((cat: any) => cat.label === data.category[0])?.value
+                    ? [
+                        categoryOptions.find((cat: any) => cat.label === data.category[0])
+                            .value,
+                    ]
+                    : [],
+        }
+
         try {
-            const res = await updateService({ ...data, id }).unwrap();
+            const res = await updateService({ ...modifyValues, id }).unwrap();
 
             toast.success(res?.message);
 
@@ -85,17 +101,15 @@ const UpdateProductModel = ({ open, setOpen, id }: TProps) => {
     const defaultValues = {
         title: singleData?.title || "",
         sub_title: singleData?.sub_title || "",
-        category: singleData?.category || "",
+        category: singleData?.category
+            ? [singleData?.category.name]
+            : [],
         images: singleData?.images || [],
         description: singleData?.description || "",
         meta_description: singleData?.meta_description || "",
         meta_keywords: singleData.meta_keywords || [],
         meta_title: singleData?.meta_title || "",
-
-
-
     };
-
 
     return (
         <>
@@ -129,12 +143,11 @@ const UpdateProductModel = ({ open, setOpen, id }: TProps) => {
                                         </Grid>
 
                                         <Grid item md={12} sm={12}>
-                                            <NSIAutoComplete
+                                            <CategoryAutocomplete
                                                 label="Category"
                                                 name="category"
-                                                options={serviceCategory}
+                                                options={categoryOptions}
                                             />
-
                                         </Grid>
 
 

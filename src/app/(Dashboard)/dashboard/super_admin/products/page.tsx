@@ -22,6 +22,7 @@ import { TService } from "@/types";
 import CreateProductModel from "./_components/CreateProductModel";
 import UpdateProductModel from "./_components/UpdateProductModel";
 import { useDeleteProductMutation, useGetAllProductQuery } from "@/redux/api/productApi";
+import ProductCategory from "./_components/ProductCategory";
 
 
 
@@ -30,6 +31,7 @@ const ServicePage = () => {
     const [openUpdateModal, setOpenUpdateModal] = useState(false);
     const [selectedTortureId, setSelectedTortureId] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [categoryOpen, setCategoryOpen] = useState(false);
     const { data: productData, isLoading } = useGetAllProductQuery({ page: currentPage, limit: 5 });
     const [deleteBanner] = useDeleteProductMutation();
     const handleOpen = () => setOpen(true);
@@ -41,6 +43,8 @@ const ServicePage = () => {
 
     const handleClose = () => setOpen(false);
     const handleCloseUpdateModal = () => setOpenUpdateModal(false);
+    const handleCategoryOpen = () => setCategoryOpen(true);
+    const handleCategoryClose = () => setCategoryOpen(false);
 
     if (isLoading) {
         return <p>Loading...........</p>;
@@ -117,12 +121,20 @@ const ServicePage = () => {
                     <Box display='flex' justifyContent='space-between'>
                         <Typography variant="h5" fontWeight='bold'>Product List </Typography>
 
-                        <Button
-                            onClick={handleOpen}
-                            startIcon={<AddCircleOutlineIcon />}>
-                            Create Product
-                        </Button>
 
+                        <div className="flex items-center ">
+                            <Button
+                                sx={{ marginRight: '3px' }}
+                                onClick={handleOpen}
+                                startIcon={<AddCircleOutlineIcon />}>
+                                Create Product
+                            </Button>
+                            <Button
+                                onClick={handleCategoryOpen}
+                                startIcon={<AddCircleOutlineIcon />}>
+                                Create Category
+                            </Button>
+                        </div>
                     </Box>
                     <Box bgcolor="white" padding={3}>
                         <TableContainer component={Paper}>
@@ -153,7 +165,7 @@ const ServicePage = () => {
                                                 }
                                             </TableCell>
                                             <TableCell align="center">{data.title}</TableCell>
-                                            <TableCell align="center">{data?.category}</TableCell>
+                                            <TableCell align="center">{data?.category?.name}</TableCell>
 
 
 
@@ -195,6 +207,13 @@ const ServicePage = () => {
                             open={openUpdateModal}
                             setOpen={handleCloseUpdateModal}
                             id={selectedTortureId}
+                        />
+                    )}
+                    {categoryOpen && (
+                        <ProductCategory
+                            open={categoryOpen}
+                            setOpen={handleCategoryClose}
+
                         />
                     )}
                 </Box>

@@ -3,7 +3,7 @@
 import ADForm from "@/components/Forms/Form";
 import ADInput from "@/components/Forms/Input";
 import { Box, Button, Grid, styled, Typography, } from "@mui/material";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import GlobalImageSelector from "@/components/Shared/ImageSelector/GlobalImageSelector";
 import ADTextArea from "@/components/Forms/TextArea";
@@ -16,9 +16,10 @@ import NSIInput from "@/components/Forms/Input";
 import { productCategory, serviceCategory } from "@/constant/service";
 import NSIEditor from "@/components/Forms/JodiEditor";
 import { useCreatServiceMutation } from "@/redux/api/serviceApi";
-import { useCreatProductMutation } from "@/redux/api/productApi";
+import { useCreatProductMutation, useGetAllProductCategoriesQuery } from "@/redux/api/productApi";
 import NSIAutoComplete from "@/components/Forms/AutoComplete";
 import NSITextArea from "@/components/Forms/TextArea";
+import CategoryAutocomplete from "../../services/_components/CategoryAutocomplete";
 
 const FormContainer = styled(Box)(({ theme }) => ({
     padding: theme.spacing(4),
@@ -46,14 +47,29 @@ const CreateProductModel = ({ open, setOpen }: TProps) => {
     const [createProduct] = useCreatProductMutation()
     const [images, setImages] = useState<string[]>([]);
     const [imageOpen, setImageOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const { data, isLoading } = useGetAllProductCategoriesQuery({ page: currentPage, limit: 5 });
+    const categoryOptions = useMemo(() => {
+        if (!data?.data?.productCategories) return [];
+        return data.data.productCategories.map((category: any) => ({
+            label: category.name,
+            value: category._id,
+        }));
+    }, [data]);
 
-
-
-
-    const handleSubmit = async (values: FieldValues) => {
+    const handleSubmit = async (data: FieldValues) => {
         const modifiedValues = {
-            ...values,
-            images
+            ...data,
+            images,
+            category:
+                data.category &&
+                    data.category[0] &&
+                    categoryOptions.find((cat: any) => cat.label === data.category[0])?.value
+                    ? [
+                        categoryOptions.find((cat: any) => cat.label === data.category[0])
+                            .value,
+                    ]
+                    : [],
 
         };
 
@@ -120,10 +136,10 @@ const CreateProductModel = ({ open, setOpen }: TProps) => {
                                     />
                                 </Grid>
                                 <Grid item md={12} sm={12}>
-                                    <NSIAutoComplete
-                                        label="Meta Keywords"
-                                        name="meta_keywords"
-                                        options={serviceCategory}
+                                    <CategoryAutocomplete
+                                        label="Category"
+                                        name="category"
+                                        options={categoryOptions}
                                     />
 
                                 </Grid>

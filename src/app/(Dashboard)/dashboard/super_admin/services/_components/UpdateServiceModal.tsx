@@ -1,24 +1,20 @@
 "use client";
 
 import ADForm from "@/components/Forms/Form";
-import ADInput from "@/components/Forms/Input";
 import { Box, Button, Grid, styled, Typography, } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import GlobalImageSelector from "@/components/Shared/ImageSelector/GlobalImageSelector";
-import ADTextArea from "@/components/Forms/TextArea";
 import { toast } from "sonner";
 import NSIRightSideModal from "@/components/Shared/Modal/RightSideOpenModal";
 import ADImageUpload from "@/components/Forms/FileUpload";
-import { useGetSingleBannerQuery, useUpdateBannerMutation } from "@/redux/api/bannerApi";
 import NSIInput from "@/components/Forms/Input";
-import NSISelect from "@/components/Forms/Select";
-import { serviceCategory } from "@/constant/service";
 import NSIEditor from "@/components/Forms/JodiEditor";
-import { useGetSingleServiceQuery, useUpdateServiceMutation } from "@/redux/api/serviceApi";
+import { useGetAllServiceCategoriesQuery, useGetSingleServiceQuery, useUpdateServiceMutation } from "@/redux/api/serviceApi";
 import NSIAutoComplete from "@/components/Forms/AutoComplete";
 import NSITextArea from "@/components/Forms/TextArea";
 import { tags } from "@/constant/common";
+import CategoryAutocomplete from "./CategoryAutocomplete";
 
 
 const FormContainer = styled(Box)(({ theme }) => ({
@@ -45,27 +41,39 @@ type TProps = {
 const UpdateServiceModal = ({ open, setOpen, id }: TProps) => {
     const [images, setImages] = useState<string[]>([]);
     const [imageOpen, setImageOpen] = useState(false);
-
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const { data: categoriesData } = useGetAllServiceCategoriesQuery({ page: currentPage, limit: 5 });
+    const categoryOptions = useMemo(() => {
+        if (!categoriesData?.data?.serviceCategories) return [];
+        return categoriesData.data.serviceCategories.map((category: any) => ({
+            label: category.name,
+            value: category._id,
+        }));
+    }, [categoriesData]);
     const [updateService] = useUpdateServiceMutation()
     const { data, isLoading } = useGetSingleServiceQuery(id)
 
     const handleSubmit = async (data: FieldValues) => {
         data.images = images;
-
-
-        if (Array.isArray(data.category)) {
-            data.category = data.category.filter(key => key != null).map(
-                (key: any) => (typeof key === 'object' ? key.category : key)
-            );
-        }
         if (Array.isArray(data.meta_keywords)) {
             data.meta_keywords = data.meta_keywords.filter(key => key != null).map(
                 (key: any) => (typeof key === 'object' ? key.meta_keywords : key)
             );
         }
+
+        const modifyValues = {
+            category:
+                data.category &&
+                    data.category[0] &&
+                    categoryOptions.find((cat: any) => cat.label === data.category[0])?.value
+                    ? [
+                        categoryOptions.find((cat: any) => cat.label === data.category[0])
+                            .value,
+                    ]
+                    : [],
+        }
         try {
-            const res = await updateService({ ...data, id }).unwrap();
+            const res = await updateService({ ...modifyValues, id }).unwrap();
 
             toast.success(res?.message);
 
@@ -90,13 +98,14 @@ const UpdateServiceModal = ({ open, setOpen, id }: TProps) => {
     const defaultValues = {
         title: singleData?.title || "",
         sub_title: singleData?.sub_title || "",
-        category: singleData?.category || "",
+        category: singleData?.category
+            ? [singleData?.category.name]
+            : [],
         images: singleData?.images || [],
         description: singleData?.description || "",
         meta_description: singleData?.meta_description || "",
         meta_keywords: singleData.meta_keywords || [],
         meta_title: singleData?.meta_title || "",
-
 
 
     };
@@ -143,10 +152,10 @@ const UpdateServiceModal = ({ open, setOpen, id }: TProps) => {
                                         </Grid>
 
                                         <Grid item md={12} sm={12}>
-                                            <NSIAutoComplete
+                                            <CategoryAutocomplete
                                                 label="Category"
                                                 name="category"
-                                                options={serviceCategory}
+                                                options={categoryOptions}
                                             />
 
                                         </Grid>

@@ -1,25 +1,20 @@
 "use client";
 
 import ADForm from "@/components/Forms/Form";
-import ADInput from "@/components/Forms/Input";
 import { Box, Button, Grid, styled, Typography, } from "@mui/material";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FieldValues } from "react-hook-form";
 import GlobalImageSelector from "@/components/Shared/ImageSelector/GlobalImageSelector";
-import ADTextArea from "@/components/Forms/TextArea";
 import { toast } from "sonner";
 import ADImageUpload from "@/components/Forms/FileUpload";
 import NSIRightSideModal from "@/components/Shared/Modal/RightSideOpenModal";
-import { useCreatlBannerMutation } from "@/redux/api/bannerApi";
-import NSISelect from "@/components/Forms/Select";
 import NSIInput from "@/components/Forms/Input";
-import { serviceCategory } from "@/constant/service";
 import NSIEditor from "@/components/Forms/JodiEditor";
-import { useCreatServiceMutation } from "@/redux/api/serviceApi";
+import { useCreatServiceMutation, useGetAllServiceCategoriesQuery } from "@/redux/api/serviceApi";
 import NSIAutoComplete from "@/components/Forms/AutoComplete";
 import { tags } from "@/constant/common";
 import NSITextArea from "@/components/Forms/TextArea";
-
+import CategoryAutocomplete from "./CategoryAutocomplete";
 const FormContainer = styled(Box)(({ theme }) => ({
     padding: theme.spacing(4),
     display: "flex",
@@ -45,17 +40,35 @@ type TProps = {
 const CreateServiceModal = ({ open, setOpen }: TProps) => {
     const [createServices] = useCreatServiceMutation()
     const [images, setImages] = useState<string[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [imageOpen, setImageOpen] = useState(false);
+    const { data, isLoading } = useGetAllServiceCategoriesQuery({ page: currentPage, limit: 5 });
+    const categoryOptions = useMemo(() => {
+        if (!data?.data?.serviceCategories) return [];
+        return data.data.serviceCategories.map((category:any) => ({
+            label: category.name,
+            value: category._id,
+        }));
+    }, [data]);
 
 
+    const handleSubmit = async (data: FieldValues) => {
 
-
-    const handleSubmit = async (values: FieldValues) => {
         const modifiedValues = {
-            ...values,
-            images
+            ...data,
+            images,
+            category:
+                data.category &&
+                    data.category[0] &&
+                    categoryOptions.find((cat:any) => cat.label === data.category[0])?.value
+                    ? [
+                        categoryOptions.find((cat:any) => cat.label === data.category[0])
+                            .value,
+                    ]
+                    : [],
 
         };
+ 
 
         try {
             const res = await createServices(modifiedValues).unwrap();
@@ -108,11 +121,12 @@ const CreateServiceModal = ({ open, setOpen }: TProps) => {
                                 </Grid>
 
                                 <Grid item md={12} sm={12}>
-                                    <NSIAutoComplete
+                                    <CategoryAutocomplete
                                         label="Category"
                                         name="category"
-                                        options={serviceCategory}
+                                        options={categoryOptions}
                                     />
+
 
                                 </Grid>
 

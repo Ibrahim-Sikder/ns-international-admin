@@ -41,6 +41,32 @@ const serviceApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["services"],
     }),
+
+    //serviceCategories route 
+    creatServiceCategories: builder.mutation({
+      query: (data) => ({
+        url: "/services/categories",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["services"],
+    }),
+
+    deleteServiceCategories: builder.mutation({
+      query: (id) => ({
+        url: `/services/categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["services"],
+    }),
+    getAllServiceCategories: builder.query({
+      query: ({ page = 1, limit = 5 }) => ({
+        url: "/services/categories",
+        method: "GET",
+        params: { page, limit },
+      }),
+      providesTags: ["services"],
+    }),
   }),
 });
 
@@ -50,4 +76,7 @@ export const {
   useDeleteServiceMutation,
   useGetSingleServiceQuery,
   useUpdateServiceMutation,
+  useCreatServiceCategoriesMutation,
+  useDeleteServiceCategoriesMutation,
+  useGetAllServiceCategoriesQuery
 } = serviceApi;
